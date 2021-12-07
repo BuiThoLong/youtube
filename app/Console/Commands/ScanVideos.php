@@ -41,7 +41,7 @@ class ScanVideos extends Command
      */
     public function handle()
     {
-        $dataArr = Product::where('status', 5)->where('status_video', 2)->get();
+        $dataArr = Product::where('status', 5)->where('status_video', 1)->get();
         foreach ($dataArr as $value) {
             $str = $value->url_video;
             $re = '/.*[^-\w]([-\w]{25,})[^-\w]?.*/';
@@ -49,19 +49,21 @@ class ScanVideos extends Command
             try {
                 $contents = file_get_contents("https://drive.google.com/u/0/uc?id=" . $matches[1][0] . "&export=download&confirm=Otpd");
                 $name = Carbon::now()->format('Y-m-d') . '-' . uniqid() . '.mp4';
+             
                 Storage::put('videos/' . $name, $contents);
+            
                 $path = storage_path('app/videos/' . $name);
+       
                 Youtube::upload(storage_path('app/videos/' . $name), [
-                    'title'       => "Mini",
-                    //   $value->name,
-                    'description' => "Dự án: "
-                    // .$value->name."- Ngày xuất bản: ".Carbon::now()->format('Y-m-d'),
+                    'title'       => "Đề Tài:"
+                      .$value->name."Asm",
+                    'description' => " "
+                    .$value->code_subject."- Ngày xuất bản: ".Carbon::now()->format('Y-m-d'),
                 ]);
 
 
                 $product = Product::find($value->id);
-                $product->status_video = 3;
-
+                $product->status_video = 2;
                 $product->save();
                 unlink($path); 
             } catch (\Exception $ex) {
